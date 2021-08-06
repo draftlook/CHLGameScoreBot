@@ -1,0 +1,8 @@
+rvest
+xml2
+glue
+jsonlite
+tidyr
+dplyr
+gt
+webshot
