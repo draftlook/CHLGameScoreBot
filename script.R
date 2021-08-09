@@ -278,7 +278,7 @@ tweet_tables <- function(x, date) {
 
 ### SCRIPT
 #Setting date
-date <- as.character(Sys.Date()-154)
+date <- "2021-03-12"
 #Getting box score urls
 game_urls <- get_game_urls(date)
 #Extracting JSON file urls
