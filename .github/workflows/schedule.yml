@@ -20,9 +20,10 @@ jobs:
         with:
           r-version: "4.0.3"
 
-      # If using R:
       - name: Install dependencies
-        run: Rscript --vanilla install.R
+        run: |
+          install.packages(c('rvest', 'xml2', 'glue', 'jsonlite', 'tidyr', 'dplyr', 'gt', 'webshot'))
+        shell: Rscript {0}
 
       # If using R:
       - name: Pull data
