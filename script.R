@@ -210,7 +210,6 @@ get_match_score <- function(json_url) {
 
 ##Function: Build game score table
 get_table <- function(json_urls, x, home_or_visitor, date) {
-  source("rebuiltfunctions.R")
   library(gt)
   library(glue)
   library(webshot)
