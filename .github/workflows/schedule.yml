@@ -1,8 +1,5 @@
 name: Run scheduled action
-on:
-  schedule:
-    # You need to set your schedule here
-    - cron: "0 5 * * *"
+on: workflow_dispatch
 
 jobs:
   pull_data:
