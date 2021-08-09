@@ -10,4 +10,4 @@ jobs:
       - name: Install packages
         run: Rscript -e 'install.packages(c("rvest", "xml2", "glue", "jsonlite", "tidyr", "dplyr", "gt", "webshot"), dependencies = TRUE)'
       - name: Generate and post tweet
-        run: Rscript script.R
+        run: Rscript -e "source('script.R')"
