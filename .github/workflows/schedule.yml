@@ -26,4 +26,4 @@ jobs:
 
       # If using R:
       - name: Pull data
-        run: Rscript scripttorun.R
+        run: Rscript --vanilla script.R
