@@ -3,7 +3,7 @@ on: workflow_dispatch
   
 jobs:
   chlgamescorebot-post:
-    runs-on: windows-latest
+    runs-on: macOS-latest
     env:
       TWITTER_API_KEY: ${{ secrets.API_KEY }}
       TWITTER_API_SECRET: ${{ secrets.API_SECRET }}
