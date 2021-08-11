@@ -281,5 +281,5 @@ game_urls <- get_game_urls(as.character(Sys.Date()-157))
 #Extracting JSON file urls
 json_urls <- sapply(game_urls, get_json_url)
 #Getting lineup data & tweeting game score cards
-lapply(1:length(json_urls), tweet_tables, date = date)
+lapply(1:length(json_urls), tweet_tables, date = as.character(Sys.Date()-157))
 
