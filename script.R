@@ -276,10 +276,8 @@ tweet_tables <- function(x, date) {
 }
 
 ### SCRIPT
-#Setting date
-date <- as.character(Sys.Date()-157)
 #Getting box score urls
-game_urls <- get_game_urls(date)
+game_urls <- get_game_urls(as.character(Sys.Date()-157))
 #Extracting JSON file urls
 json_urls <- sapply(game_urls, get_json_url)
 #Getting lineup data & tweeting game score cards
