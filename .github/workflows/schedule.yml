@@ -12,12 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
-      - uses: actions/cache@v2
-        with:
-          path: ~/Documents/CHLGameScore
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-renv-
       - name: Install packages
         run: Rscript -e 'install.packages(c("rvest", "xml2", "glue", "jsonlite", "tidyr", "dplyr", "gt", "webshot", "twitteR"), dependencies = TRUE); webshot::install_phantomjs()'
       - name: Generate and post tweet
