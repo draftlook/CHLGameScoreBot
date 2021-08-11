@@ -4,11 +4,6 @@ on: workflow_dispatch
 jobs:
   chlgamescorebot-post:
     runs-on: macOS-latest
-    env:
-      TWITTER_API_KEY: ${{ secrets.API_KEY }}
-      TWITTER_API_SECRET: ${{ secrets.API_SECRET }}
-      TWITTER_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      TWITTER_ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
