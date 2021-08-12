@@ -296,11 +296,18 @@ tweet_tables <- function(x, date) {
   json_urls %>% get_table(x, "away", date)
 }
 
+#Function: Tweet all games from specified league
+tweet_league <- function(date, league) {
+  #Getting game urls
+  game_urls <- get_game_urls(date, league)
+  #Extracting JSON file urls
+  json_urls <- sapply(game_urls, get_json_url)
+  #Getting lineup data & tweeting game score cards
+  lapply(1:length(json_urls), tweet_tables, date = date)
+}
+
 ### SCRIPT
-#Getting box score urls
-game_urls <- get_game_urls("2019-09-06", "lhjmq")
-#Extracting JSON file urls
-json_urls <- sapply(game_urls, get_json_url)
-#Getting lineup data & tweeting game score cards
-lapply(1:length(json_urls), tweet_tables, date = as.character(Sys.Date()-158))
+#Tweet all leagues
+lapply(c("lhjmq", "ohl", "whl"), FUN = tweet_league, date = as.character(Sys.Date()-710))
+
 
