@@ -308,6 +308,6 @@ tweet_league <- function(date, league) {
 
 ### SCRIPT
 #Tweet all leagues
-tweet_league(as.character(Sys.Date()-710), "lhjmq")
-tweet_league(as.character(Sys.Date()-710), "ohl")
+try(tweet_league(as.character(Sys.Date()-710), "lhjmq"))
+try(tweet_league(as.character(Sys.Date()-710), "ohl"))
 tweet_league(as.character(Sys.Date()-710), "whl")
