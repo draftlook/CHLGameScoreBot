@@ -278,10 +278,10 @@ get_table <- function(json_urls, x, home_or_visitor, date) {
   ###twitteR
   library(twitteR)
   #Loading app keys/tokens
-  api_key <- "WHIsnHhHnwd5s8UkAJtTw5DIs"
-  api_secret <- "fCK6KwJhYzLYrIoGy9X6evYwfeKI5jB6hRBeW6wZmYhwHHqfRR"
-  access_token <- "1419002410639388673-K2rrFRoiZcuIM09P94glHbPyCcbQ7s"
-  access_secret <- "RoeCRKPe2h42dIiyQBg4tSNx1AxZ6FZ7MzzHbTnGVWuAe"
+  api_key <- Sys.getenv("TWITTER_API_KEY")
+  api_secret <- Sys.getenv("TWITTER_API_SECRET")
+  access_token <- Sys.getenv("TWITTER_ACCESS_TOKEN")
+  access_secret <- Sys.getenv("TWITTER_ACCESS_SECRET")
   #Authorizing twitteR
   setup_twitter_oauth(api_key, api_secret, access_token, access_secret)
   #Getting "hometeam vs awayteam/awayteam @hometeam" string
