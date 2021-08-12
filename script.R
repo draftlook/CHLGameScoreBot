@@ -1,20 +1,41 @@
 ###Functions
 
 ##Function: Get box score urls
-get_game_urls <- function(date) {
+get_game_urls <- function(date, league) {
   ##Loading packages
   library(rvest)
   library(xml2)
   library(glue)
   library(jsonlite)
   
+  ohl_key <- "2976319eb44abe94"
+  whl_key <- "41b145a848f4bd67"
+  lhjmq_key <- "f322673b6bcae299"
+  
   ##Getting JSON link for the day's link
-  json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=41b145a848f4bd67&fmt=json&client_code=whl&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  if(league == "ohl") {
+  json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", ohl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  }
+  if(league == "whl") {
+    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", whl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  }
+  if(league == "lhjmq") {
+    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", lhjmq_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  }
+
   game_ids <- jsonlite::fromJSON(json_link)[['SiteKit']][['Gamesbydate']][['id']]
   if(length(game_ids) == 0) {
     stop()
   }
-  output <- paste(paste("https://whl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
+  if(league == "ohl") {
+  output <- paste(paste("https://ontariohockeyleague.com/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
+  }
+  if(league == "whl") {
+    output <- paste(paste("https://whl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
+  }
+  if(league == "lhjmq") {
+    output <- paste(paste("https://theqmjhl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
+  }
   return(output)
 }
 
@@ -277,7 +298,7 @@ tweet_tables <- function(x, date) {
 
 ### SCRIPT
 #Getting box score urls
-game_urls <- get_game_urls(as.character(Sys.Date()-158))
+game_urls <- get_game_urls("2019-09-06", "lhjmq")
 #Extracting JSON file urls
 json_urls <- sapply(game_urls, get_json_url)
 #Getting lineup data & tweeting game score cards
