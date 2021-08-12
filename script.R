@@ -1,41 +1,20 @@
 ###Functions
 
 ##Function: Get box score urls
-get_game_urls <- function(date, league) {
+get_game_urls <- function(date) {
   ##Loading packages
   library(rvest)
   library(xml2)
   library(glue)
   library(jsonlite)
   
-  ohl_key <- "2976319eb44abe94"
-  whl_key <- "41b145a848f4bd67"
-  lhjmq_key <- "f322673b6bcae299"
-  
   ##Getting JSON link for the day's link
-  if(league == "ohl") {
-  json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", ohl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
-  }
-  if(league == "whl") {
-    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", whl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
-  }
-  if(league == "lhjmq") {
-    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", lhjmq_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
-  }
-
+  json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=41b145a848f4bd67&fmt=json&client_code=whl&lang=en&league_code=&fetch_date=", date, "&fmt=json")
   game_ids <- jsonlite::fromJSON(json_link)[['SiteKit']][['Gamesbydate']][['id']]
   if(length(game_ids) == 0) {
     stop()
   }
-  if(league == "ohl") {
-  output <- paste(paste("https://ontariohockeyleague.com/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
-  if(league == "whl") {
-    output <- paste(paste("https://whl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
-  if(league == "lhjmq") {
-    output <- paste(paste("https://theqmjhl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
+  output <- paste(paste("https://whl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
   return(output)
 }
 
@@ -291,23 +270,15 @@ get_table <- function(json_urls, x, home_or_visitor, date) {
 }
 
 #Function: Tweet tables
-tweet_tables <- function(x, date, json_urls) {
+tweet_tables <- function(x, date) {
   json_urls %>% get_table(x, "home", date)
   json_urls %>% get_table(x, "away", date)
 }
 
-#Function: Tweet all games from specified league
-tweet_league <- function(date, league) {
-  #Getting game urls
-  game_urls <- get_game_urls(date, league)
-  #Extracting JSON file urls
-  json_urls <- sapply(game_urls, get_json_url)
-  #Getting lineup data & tweeting game score cards
-  lapply(1:length(json_urls), tweet_tables, date = date, json_urls = json_urls)
-}
-
 ### SCRIPT
-#Tweet all leagues
-try(tweet_league(as.character(Sys.Date()-710), "lhjmq"))
-try(tweet_league(as.character(Sys.Date()-710), "ohl"))
-tweet_league(as.character(Sys.Date()-710), "whl")
+#Getting box score urls
+game_urls <- get_game_urls(as.character(Sys.Date()-158))
+#Extracting JSON file urls
+json_urls <- sapply(game_urls, get_json_url)
+#Getting lineup data & tweeting game score cards
+lapply(1:length(json_urls), tweet_tables, date = as.character(Sys.Date()-171))
