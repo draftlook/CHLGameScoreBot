@@ -279,10 +279,10 @@ tweet_game_table <- function(game_url) {
   #Saving table as 'table.png' to project directory
   gtsave(table, "table.png")
   #Setting Twitter auth info
-  api_key <- "UUufbRWhGsfx9UrOBuXFtx5IQ"
-  api_key_secret <- "1b26NNigEhK5EqjPxYbU2z7gdEkVkqQ5LrEivRa7Bs834y1ow4"
-  access_token <- "1419002410639388673-XyBHnUQu511ciObLMIQd2xcT8rqYfV"
-  access_token_secret <- "EkCfvfFlimSCYP1izg92Vplltf1Ms6V4AqLSpszLfBIz1"
+  api_key <- Sys.getenv("TWITTER_API_KEY")
+  api_key_secret <- Sys.getenv("TWITTER_API_SECRET")
+  access_token <- Sys.getenv("TWITTER_ACCESS_TOKEN")
+  access_token_secret <- Sys.getenv("TWITTER_ACCESS_SECRET")
   #Authorizing twittR
   setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
   #Tweeting table
@@ -354,10 +354,10 @@ tweet_all <- function(date) {
   #Saving top performers table as 'table.png'
   gtsave(table, "table.png")
   #Setting Twitter auth info
-  api_key <- "UUufbRWhGsfx9UrOBuXFtx5IQ"
-  api_key_secret <- "1b26NNigEhK5EqjPxYbU2z7gdEkVkqQ5LrEivRa7Bs834y1ow4"
-  access_token <- "1419002410639388673-XyBHnUQu511ciObLMIQd2xcT8rqYfV"
-  access_token_secret <- "EkCfvfFlimSCYP1izg92Vplltf1Ms6V4AqLSpszLfBIz1"
+  api_key <- Sys.getenv("TWITTER_API_KEY")
+  api_key_secret <- Sys.getenv("TWITTER_API_SECRET")
+  access_token <- Sys.getenv("TWITTER_ACCESS_TOKEN")
+  access_token_secret <- Sys.getenv("TWITTER_ACCESS_SECRET")
   #Authorizing twittR
   setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
   #Tweeting table
