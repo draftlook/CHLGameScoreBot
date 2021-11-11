@@ -1,81 +1,71 @@
-###Functions
-
-##Function: Get box score urls
-get_game_urls <- function(date, league) {
-  ##Loading packages
+###Function 1: Get game urls for specified date
+get_daily_urls <- function(date) {
+  #Loading packages
   library(rvest)
   library(xml2)
   library(glue)
   library(jsonlite)
-  
+  #Setting league keys
   ohl_key <- "2976319eb44abe94"
   whl_key <- "41b145a848f4bd67"
-  lhjmq_key <- "f322673b6bcae299"
-  
-  ##Getting JSON link for the day's link
-  if(league == "ohl") {
-    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", ohl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  qmjhl_key <- "f322673b6bcae299"
+  #Getting OHL games
+  ohl_json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", ohl_key, "&fmt=json&client_code=ohl&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  ohl_game_ids <- jsonlite::fromJSON(ohl_json_link)[['SiteKit']][['Gamesbydate']][['id']]
+  if(length(ohl_game_ids) == 0) {ohl_game_links <- NULL} else {
+    ohl_game_links <- paste(paste("https://ontariohockeyleague.com/gamecentre/", ohl_game_ids, sep=""),"/boxscore", sep="")
   }
-  if(league == "whl") {
-    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", whl_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  #Getting WHL games
+  whl_json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", whl_key, "&fmt=json&client_code=whl&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  whl_game_ids <- jsonlite::fromJSON(whl_json_link)[['SiteKit']][['Gamesbydate']][['id']]
+  if(length(whl_game_ids) == 0) {whl_game_links <- NULL} else {
+    whl_game_links <- paste(paste("https://whl.ca/gamecentre/", whl_game_ids, sep=""),"/boxscore", sep="")
   }
-  if(league == "lhjmq") {
-    json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", lhjmq_key, "&fmt=json&client_code=", league, "&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  #Getting QMJHL games
+  qmjhl_json_link <- glue("https://lscluster.hockeytech.com/feed/?feed=modulekit&view=gamesbydate&key=", qmjhl_key, "&fmt=json&client_code=lhjmq&lang=en&league_code=&fetch_date=", date, "&fmt=json")
+  qmjhl_game_ids <- jsonlite::fromJSON(qmjhl_json_link)[['SiteKit']][['Gamesbydate']][['id']]
+  if(length(qmjhl_game_ids) == 0) {qmjhl_game_links <- NULL} else {
+    qmjhl_game_links <- paste(paste("https://theqmjhl.ca/gamecentre/", qmjhl_game_ids, sep=""),"/boxscore", sep="")
   }
-  
-  game_ids <- jsonlite::fromJSON(json_link)[['SiteKit']][['Gamesbydate']][['id']]
-  if(length(game_ids) == 0) {
-    stop()
-  }
-  if(league == "ohl") {
-    output <- paste(paste("https://ontariohockeyleague.com/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
-  if(league == "whl") {
-    output <- paste(paste("https://whl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
-  if(league == "lhjmq") {
-    output <- paste(paste("https://theqmjhl.ca/gamecentre/", game_ids, sep=""),"/boxscore", sep="")
-  }
-  return(output)
+  #Returning one vector of all games for all leagues
+  return(c(ohl_game_links, whl_game_links, qmjhl_game_links))
 }
 
-##Function: Get JSON url
-get_json_url <- function(url) {
-  ##Loading packages
-  library(rvest)
-  library(xml2)
-  library(glue)
-  
-  ##Setting url and static codes
-  feed <- "gc"
-  fmt <- "json"
-  tab <- "gamesummary"
-  
-  ##Extracting key
-  key <- read_html(url) %>%
+###Function 2: Get game urls for a range of dates
+get_range_urls <- function(start_date, end_date) {
+  dates <- sapply(seq(as.Date(start_date), as.Date(end_date), "days"), as.character)
+  return(unlist(lapply(dates, get_daily_urls)))
+}
+
+###Function 3: Get game data, create table, tweet table
+tweet_game_table <- function(game_url) {
+  #Loading packages
+  library(tidyr)
+  library(dplyr)
+  library(gt)
+  ##Building JSON URL
+  #Extracting key
+  key <- read_html(game_url) %>%
     html_nodes("#gamecentre") %>%
     html_attr("data-feed_key")
-  
-  ##Extracting client_code (league)
-  client_code <- read_html(url) %>%
+  key <- read_html(game_url) %>%
+    html_nodes("#gamecentre") %>%
+    html_attr("data-feed_key")
+  #Extracting client_code (league)
+  client_code <- read_html(game_url) %>%
     html_nodes("#gamecentre") %>%
     html_attr("data-league")
-  
-  ##Extracting game_id
-  game_id <- read_html(url) %>%
+  #Extracting game_id
+  game_id <- read_html(game_url) %>%
     html_nodes("#gamecentre") %>%
     html_attr("data-path")
-  
-  ##Extracting lang_code
-  lang_code <- read_html(url) %>%
+  #Extracting lang_code
+  lang_code <- read_html(game_url) %>%
     html_nodes("#gamecentre") %>%
     html_attr("data-lang")
-  
   ##Formulating json_url
   json_url <- glue(
-    "https://cluster.leaguestat.com/feed/index.php?feed=",
-    feed,
-    "&key=",
+    "https://cluster.leaguestat.com/feed/index.php?feed=gc&key=",
     key,
     "&client_code=",
     client_code,
@@ -83,18 +73,8 @@ get_json_url <- function(url) {
     game_id,
     "&lang_code=",
     lang_code,
-    "&fmt=",
-    fmt,
-    "&tab=",
-    tab
+    "&fmt=json&tab=gamesummary"
   )
-  return(json_url)
-}
-
-##Function: Get lineup data
-get_lineup_data <- function(json_url) {
-  library(tidyr)
-  library(dplyr)
   #Getting JSON data
   data <- jsonlite::fromJSON(json_url)
   #Getting lineups
@@ -135,18 +115,30 @@ get_lineup_data <- function(json_url) {
   
   #Getting pluses
   pluses <- as.data.frame(unlist(lapply(which(even_strength == TRUE), FUN = function(x) data[['GC']][['Gamesummary']][['goals']][['plus']][[x]]$player_id)))
-  colnames(pluses)[1] <- "player_id"
-  pluses <- pluses %>% group_by(player_id) %>% tally()
-  colnames(pluses)[2] <- "goals_for"
+  if(!(length(pluses) == 0)) {
+    colnames(pluses)[1] <- "player_id"
+    pluses <- pluses %>% group_by(player_id) %>% tally()
+    colnames(pluses)[2] <- "goals_for"
+  } else {
+    pluses <- data.frame(0,0)
+    colnames(pluses)[1] <- "player_id"
+    colnames(pluses)[2] <- "goals_for"
+  }
   #Adding individual pluses to lineup data
   home_lineup <- merge(home_lineup, pluses, by="player_id", all.x=TRUE)
   away_lineup <- merge(away_lineup, pluses, by="player_id", all.x=TRUE)
   
   #Getting minuses
   minuses <- as.data.frame(unlist(lapply(which(even_strength == TRUE), FUN = function(x) data[['GC']][['Gamesummary']][['goals']][['minus']][[x]]$player_id)))
-  colnames(minuses)[1] <- "player_id"
-  minuses <- minuses %>% group_by(player_id) %>% tally()
-  colnames(minuses)[2] <- "goals_against"
+  if(!(length(minuses) == 0)) {
+    colnames(minuses)[1] <- "player_id"
+    minuses <- minuses %>% group_by(player_id) %>% tally()
+    colnames(minuses)[2] <- "goals_against"
+  } else {
+    minuses <- data.frame(0,0)
+    colnames(minuses)[1] <- "player_id"
+    colnames(minuses)[2] <- "goals_against"
+  }
   #Adding individual minuses to lineup data
   home_lineup <- merge(home_lineup, minuses, by="player_id", all.x=TRUE)
   away_lineup <- merge(away_lineup, minuses, by="player_id", all.x=TRUE)
@@ -178,6 +170,7 @@ get_lineup_data <- function(json_url) {
   home_lineup <- mutate(home_lineup, faceoff_losses = as.numeric(home_lineup$faceoff_attempts) - as.numeric(home_lineup$faceoff_wins))
   hometeam <- data[['GC']][['Gamesummary']][['home']][['name']]
   homecode <- data[['GC']][['Gamesummary']][['home']][['code']]
+  homescore <- data[['GC']][['Gamesummary']][['meta']][['home_goal_count']]
   home_lineup <- cbind(home_lineup, as.data.frame(hometeam))
   home_lineup <- cbind(home_lineup, as.data.frame(homecode))
   home_lineup <- home_lineup[c("player_id", "name", "hometeam", "homecode", "position_str", "g", "a1", "a2", "shots_on", "penalties_taken", "faceoff_wins", "faceoff_losses", "goals_for", "goals_against")] %>%
@@ -195,6 +188,7 @@ get_lineup_data <- function(json_url) {
   away_lineup <- mutate(away_lineup, faceoff_losses = as.numeric(away_lineup$faceoff_attempts) - as.numeric(away_lineup$faceoff_wins))
   awayteam <- data[['GC']][['Gamesummary']][['visitor']][['name']]
   awaycode <- data[['GC']][['Gamesummary']][['visitor']][['code']]
+  awayscore <- data[['GC']][['Gamesummary']][['meta']][['visiting_goal_count']]
   away_lineup <- cbind(away_lineup, as.data.frame(awayteam))
   away_lineup <- cbind(away_lineup, as.data.frame(awaycode))
   away_lineup <- away_lineup[c("player_id", "name", "awayteam", "awaycode", "position_str", "g", "a1", "a2", "shots_on", "penalties_taken", "faceoff_wins", "faceoff_losses", "goals_for", "goals_against")] %>%
@@ -213,40 +207,23 @@ get_lineup_data <- function(json_url) {
   home_lineup <- mutate(home_lineup, home_or_away = "home")
   away_lineup <- mutate(away_lineup, game_score = ((0.75 * as.numeric(away_lineup$goals)) + (0.7 * as.numeric(away_lineup$first_assists)) + (0.55 * as.numeric(away_lineup$second_assists)) + (0.075 * as.numeric(away_lineup$sog)) - (0.15 * as.numeric(away_lineup$penalties_taken)) + (0.01 * as.numeric(away_lineup$faceoff_wins)) - (0.01 * as.numeric(away_lineup$faceoff_losses)) + (0.15 * as.numeric(away_lineup$goals_for)) - (0.15 * as.numeric(away_lineup$goals_against))))
   away_lineup <- mutate(away_lineup, home_or_away = "away")
-  lineup_data <- rbind(home_lineup, away_lineup)
-  return(lineup_data)
-}
-
-##Function: Get match score
-get_match_score <- function(json_url) {
-  library(jsonlite)
-  library(dplyr)
-  # Getting JSON file
-  data <- jsonlite::fromJSON(json_url)
-  data <- as.data.frame(data[['GC']][['Gamesummary']][['goals']][['goal_scorer']][['team_code']])
-  colnames(data)[1] <- "team"
-  data <- data %>% group_by(team) %>% tally()
-  return(data)
-}
-
-##Function: Build game score table
-get_table <- function(json_urls, x, home_or_visitor, date) {
-  library(gt)
-  library(glue)
-  library(webshot)
-  lineup <- lapply(json_urls, get_lineup_data)[[x]]
-  score <- lapply(json_urls, get_match_score)[[x]]
+  lineups <- rbind(home_lineup, away_lineup)
   
-  home_team <- lineup$team[1]
-  home_code <- lineup$code[1]
-  away_team <- lineup$team[nrow(lineup)]
-  away_code <- lineup$code[nrow(lineup)]
-  lineup <- filter(lineup, lineup$home_or_away == home_or_visitor)
+  #Building subtitle string
+  date <- data[['GC']][['Gamesummary']][['game_date']]
+  if(client_code == "ohl") {
+    subtitle <- glue("Ontario Hockey League | ", date)
+  } else if (client_code == "whl") {
+    subtitle <- glue("Western Hockey League | ", date)
+  } else if (client_code == "lhjmq") {
+    subtitle <- glue("Quebec Major Junior Hockey League | ", date)
+  }
   
-  #Home team
-  table <- lineup[c("name", "code", "pos", "goals", "first_assists", "second_assists", "sog", "penalties_taken", "faceoff_wins", "faceoff_losses", "goals_for", "goals_against", "game_score")][order(-lineup$game_score),] %>%
+  table <- lineups[c("name", "pos", "code", "goals", "first_assists", "second_assists", "sog", "penalties_taken", "faceoff_wins", "faceoff_losses", "goals_for", "goals_against", "game_score")][order(-lineups$game_score),] %>%
     gt() %>%
-    tab_header(title = glue(home_team, " (", score$n[score$team == home_code], ") ", "vs ", away_team, " (", score$n[score$team == away_code], ")"), subtitle = date) %>%
+    tab_header(title= glue(awayteam, " (", awayscore, ") @ ", hometeam, " (", homescore, ")"), subtitle= subtitle) %>%
+    tab_source_note("Bot by @DraftLook using data from chl.ca") %>%
+    tab_source_note("Game score concept from Dom Luszczyszyn") %>%
     cols_label(
       name = "Player",
       code = "Team",
@@ -260,7 +237,7 @@ get_table <- function(json_urls, x, home_or_visitor, date) {
       faceoff_losses = "FOL",
       goals_for = "GF",
       goals_against = "GA",
-      game_score = "Game Score"
+      game_score = "Score"
     ) %>%
     cols_align(
       align = "center",
@@ -270,52 +247,121 @@ get_table <- function(json_urls, x, home_or_visitor, date) {
       align = "left",
       columns = "name"
     ) %>%
+    cols_align(
+      align = "right",
+      columns = "game_score"
+    ) %>%
     cols_width(
-      "game_score" ~ px(100)
-    )
-  #Saving table as png
+      "game_score" ~ px(30)
+    ) %>%
+    tab_options(data_row.padding = px(3)) %>%
+    tab_style(
+      style = list(
+        cell_text(
+          font = "Bahnschrift",
+          align = "center"
+        )
+      ),
+      locations = list(
+        cells_title(groups = "title")
+      )) %>%
+    tab_style(
+      style = list(
+        cell_text(
+          font = "Bahnschrift",
+          align = "center"
+        )
+      ),
+      locations = list(
+        cells_title(groups = "subtitle")
+      )) %>%
+    opt_table_font(google_font("Karla"), weight="bolder")
+  #Saving table as 'table.png' to project directory
   gtsave(table, "table.png")
-  ###twitteR
-  library(twitteR)
-  #Loading app keys/tokens
-  api_key <- Sys.getenv("TWITTER_API_KEY")
-  api_secret <- Sys.getenv("TWITTER_API_SECRET")
-  access_token <- Sys.getenv("TWITTER_ACCESS_TOKEN")
-  access_secret <- Sys.getenv("TWITTER_ACCESS_SECRET")
-  #Authorizing twitteR
-  setup_twitter_oauth(api_key, api_secret, access_token, access_secret)
-  #Getting "hometeam vs awayteam/awayteam @hometeam" string
-  twitter_string <- ifelse(home_or_visitor == "home", glue(home_team, " vs ", away_team), glue(away_team, " @ ", home_team))
+  #Setting Twitter auth info
+  api_key <- "UUufbRWhGsfx9UrOBuXFtx5IQ"
+  api_key_secret <- "1b26NNigEhK5EqjPxYbU2z7gdEkVkqQ5LrEivRa7Bs834y1ow4"
+  access_token <- "1419002410639388673-XyBHnUQu511ciObLMIQd2xcT8rqYfV"
+  access_token_secret <- "EkCfvfFlimSCYP1izg92Vplltf1Ms6V4AqLSpszLfBIz1"
+  #Authorizing twittR
+  setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
   #Tweeting table
-  tweet(glue("#CHL Game Score Card: ", twitter_string, " on ", date), mediaPath = "table.png")
+  tweet(glue("#CHL Game Score Card: ", hometeam, " vs ", awayteam, " on ", data[['GC']][['Gamesummary']][['meta']][['date_played']]), mediaPath = "table.png")
+  return(lineups)
 }
 
-#Function: Tweet tables
-tweet_tables <- function(x, date, json_urls) {
-  json_urls %>% get_table(x, "home", date)
-  json_urls %>% get_table(x, "away", date)
+tweet_all <- function(date) {
+  all_games_list <- get_daily_urls(date) %>% lapply(tweet_game_table)
+  all_games_df <- bind_rows(all_games_list)
+  all_games_df <- head(all_games_df[order(-all_games_df$game_score),],25)
+  table <- all_games_df[c("name", "pos", "code", "goals", "first_assists", "second_assists", "sog", "penalties_taken", "faceoff_wins", "faceoff_losses", "goals_for", "goals_against", "game_score")][order(-all_games_df$game_score),] %>%
+    gt() %>%
+    tab_header(title= "Today's Top Performers", subtitle= glue("Canadian Hockey League | ", date)) %>%
+    tab_source_note("Bot by @DraftLook using data from chl.ca") %>%
+    tab_source_note("Game score concept from Dom Luszczyszyn") %>%
+    cols_label(
+      name = "Player",
+      code = "Team",
+      pos = "Pos",
+      goals = "G",
+      first_assists = "A1",
+      second_assists = "A2",
+      sog = "SOG",
+      penalties_taken = "Pen.",
+      faceoff_wins = "FOW",
+      faceoff_losses = "FOL",
+      goals_for = "GF",
+      goals_against = "GA",
+      game_score = "Score"
+    ) %>%
+    cols_align(
+      align = "center",
+      columns = everything()
+    ) %>%
+    cols_align(
+      align = "left",
+      columns = "name"
+    ) %>%
+    cols_align(
+      align = "right",
+      columns = "game_score"
+    ) %>%
+    cols_width(
+      "game_score" ~ px(30)
+    ) %>%
+    tab_options(data_row.padding = px(3)) %>%
+    tab_style(
+      style = list(
+        cell_text(
+          font = "Bahnschrift",
+          align = "center"
+        )
+      ),
+      locations = list(
+        cells_title(groups = "title")
+      )) %>%
+    tab_style(
+      style = list(
+        cell_text(
+          font = "Bahnschrift",
+          align = "center"
+        )
+      ),
+      locations = list(
+        cells_title(groups = "subtitle")
+      )) %>%
+    opt_table_font(google_font("Karla"), weight="bolder")
+  #Saving top performers table as 'table.png'
+  gtsave(table, "table.png")
+  #Setting Twitter auth info
+  api_key <- "UUufbRWhGsfx9UrOBuXFtx5IQ"
+  api_key_secret <- "1b26NNigEhK5EqjPxYbU2z7gdEkVkqQ5LrEivRa7Bs834y1ow4"
+  access_token <- "1419002410639388673-XyBHnUQu511ciObLMIQd2xcT8rqYfV"
+  access_token_secret <- "EkCfvfFlimSCYP1izg92Vplltf1Ms6V4AqLSpszLfBIz1"
+  #Authorizing twittR
+  setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
+  #Tweeting table
+  tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
 }
 
-#Function: Tweet all games from specified league
-date <- "2019-07-01"
-league <- "ohl"
-tweet_league <- function(date, league) {
-  #TryCatch -- Getting game urls, returning NULL if no games on that date
-  tryCatch(
-    expr = {
-      game_urls <- get_game_urls(date, league)
-      #Extracting JSON file urls
-      json_urls <- sapply(game_urls, get_json_url)
-      #Getting lineup data & tweeting game score cards
-      return(lapply(1:length(json_urls), tweet_tables, date = date, json_urls = json_urls))
-    }, error = function(e) {
-      return(NULL)
-    }
-  )
-}
-
-### SCRIPT
-#Tweet all leagues
-tweet_league(as.character(Sys.Date()-711), "lhjmq")
-tweet_league(as.character(Sys.Date()-711), "ohl")
-tweet_league(as.character(Sys.Date()-711), "whl")
+tweet_all(toString(Sys.Date()))
