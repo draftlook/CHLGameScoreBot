@@ -367,4 +367,4 @@ tweet_all <- function(date) {
   tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
 }
 
-tweet_all(toString(Sys.Date()))
+tweet_all(toString(Sys.Date()-1))
