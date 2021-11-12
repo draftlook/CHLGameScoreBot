@@ -168,7 +168,7 @@ tweet_game_table <- function(game_url) {
   
   ##Cleaning home lineup
   home_lineup <- mutate(home_lineup, faceoff_losses = as.numeric(home_lineup$faceoff_attempts) - as.numeric(home_lineup$faceoff_wins))
-  hometeam <- data[['GC']][['Gamesummary']][['home']][['name']]
+  hometeam <- str_replace(data[['GC']][['Gamesummary']][['home']][['name']], ',', "")
   homecode <- data[['GC']][['Gamesummary']][['home']][['code']]
   homescore <- data[['GC']][['Gamesummary']][['meta']][['home_goal_count']]
   home_lineup <- cbind(home_lineup, as.data.frame(hometeam))
@@ -186,7 +186,7 @@ tweet_game_table <- function(game_url) {
   
   ##Cleaning away lineup
   away_lineup <- mutate(away_lineup, faceoff_losses = as.numeric(away_lineup$faceoff_attempts) - as.numeric(away_lineup$faceoff_wins))
-  awayteam <- data[['GC']][['Gamesummary']][['visitor']][['name']]
+  awayteam <- str_replace(data[['GC']][['Gamesummary']][['visitor']][['name']], ',', "")
   awaycode <- data[['GC']][['Gamesummary']][['visitor']][['code']]
   awayscore <- data[['GC']][['Gamesummary']][['meta']][['visiting_goal_count']]
   away_lineup <- cbind(away_lineup, as.data.frame(awayteam))
@@ -366,4 +366,4 @@ tweet_all <- function(date) {
   tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
 }
 
-tweet_all(toString(Sys.Date()-2))
+tweet_all(toString(Sys.Date()))
