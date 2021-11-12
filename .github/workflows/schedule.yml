@@ -16,6 +16,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
       - name: Install packages
-        run: Rscript -e 'install.packages(c("rvest", "xml2", "glue", "jsonlite", "tidyr", "dplyr", "gt", "webshot", "twitteR"), dependencies = TRUE); webshot::install_phantomjs()'
+        run: Rscript -e 'install.packages(c("rvest", "xml2", "glue", "jsonlite", "tidyr", "dplyr", "gt", "webshot", "twitteR", "stringr"), dependencies = TRUE); webshot::install_phantomjs()'
       - name: Generate and post tweet
         run: Rscript script.R
