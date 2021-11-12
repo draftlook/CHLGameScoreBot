@@ -43,6 +43,7 @@ tweet_game_table <- function(game_url) {
   library(tidyr)
   library(dplyr)
   library(gt)
+  library(stringr)
   ##Building JSON URL
   #Extracting key
   key <- read_html(game_url) %>%
