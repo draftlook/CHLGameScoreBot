@@ -81,6 +81,10 @@ tweet_game_table <- function(game_url) {
   #Getting lineups
   home_lineup <- data[['GC']][['Gamesummary']][['home_team_lineup']][['players']]
   away_lineup <- data[['GC']][['Gamesummary']][['visitor_team_lineup']][['players']]
+  #Returning NULL if home_lineup is empty
+  if(length(home_lineup) == 0) {
+    return(NULL)
+  }
   #Uniting full name
   home_lineup <- unite(home_lineup, col="name", c("first_name", "last_name"), sep=" ")
   away_lineup <- unite(away_lineup, col="name", c("first_name", "last_name"), sep=" ")
@@ -367,4 +371,5 @@ tweet_all <- function(date) {
   tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
 }
 
-tweet_all(toString(Sys.Date()-1))
+tweet_all(toString(Sys.Date()))
+urls <- get_daily_urls(toString(Sys.Date()-1))
