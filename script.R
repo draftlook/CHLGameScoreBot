@@ -372,4 +372,3 @@ tweet_all <- function(date) {
 }
 
 tweet_all(toString(Sys.Date()-1))
-urls <- get_daily_urls(toString(Sys.Date()-1))
