@@ -291,7 +291,7 @@ tweet_game_table <- function(game_url) {
   #Authorizing twittR
   setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
   #Tweeting table
-  tweet(glue("#CHL Game Score Card: ", hometeam, " vs ", awayteam, " on ", data[['GC']][['Gamesummary']][['meta']][['date_played']]), mediaPath = "table.png")
+  //tweet(glue("#CHL Game Score Card: ", hometeam, " vs ", awayteam, " on ", data[['GC']][['Gamesummary']][['meta']][['date_played']]), mediaPath = "table.png")
   return(lineups)
 }
 
@@ -368,7 +368,7 @@ tweet_all <- function(date) {
   #Authorizing twittR
   setup_twitter_oauth(api_key, api_key_secret, access_token, access_token_secret)
   #Tweeting table
-  tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
+  //tweet(glue("CHL Top Performers on ", date), mediaPath = "table.png")
 }
 
 tweet_all(toString(Sys.Date()-1))
